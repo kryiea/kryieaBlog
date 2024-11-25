@@ -1,0 +1,46 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Deploy VuePress Blog
+
+on:
+  push:
+    branches: 
+     - main
+     
+
+jobs:
+  build-and-delpoy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: 1️⃣Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: 2️⃣Install dependencies
+        run: npm install
+        
+      - name: 3️⃣Build blog
+        run: npm run build
+        
+      - name: 4️⃣Deploy to server
+        uses: appleboy/scp - action@master
+        with:
+          host: "8.138.107.27:22"
+          username: "root"
+          password: "kryiea0623/"
+          source: ".vuepress/dist/*"
+          target: "/var/blogvue/"
+          
+      - name: 5️⃣Restart Nginx
+        uses: appleboy/ssh - action@master
+        with:
+          host: "8.138.107.27:22"
+          username: "root"
+          password: "kryiea0623/"
+          script: "systemctl restart nginx"
